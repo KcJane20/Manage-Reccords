@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Tenants</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>All Tenants</h1>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Room</th>
+                        <th>Move-in Date</th>
+                        <th>Contact</th>
+                        <th>Rent</th>
+                    </tr>
+                </thead>
+                <tbody id="tenantList">
+                </tbody>
+            </table>
+            <p><a href="index.html" class="back-link">Back</a></p>
+        </div>
+    </main>
+
+    <script>
+        async function fetchTenants() {
+            try {
+                const response = await fetch('/viewTenants');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch tenants');
+                }
+                const tenants = await response.json();
+                
+                const tenantList = document.getElementById('tenantList');
+                tenantList.innerHTML = ''; 
+                
+                tenants.forEach((tenant, index) => {
+                    const row = document.createElement('tr');
+                    row.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+                    row.innerHTML = `
+                        <td>${tenant.tenant_id}</td>
+                        <td>${tenant.full_name}</td>
+                        <td>${tenant.room_number}</td>
+                        <td>${new Date(tenant.date_moved_in).toLocaleDateString()}</td>
+                        <td>${tenant.contact_number}</td>
+                        <td>₱${tenant.rent_amount}</td>
+                    `;
+                    tenantList.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load tenants. Please try again later.');
+            }
+        }
+
+        window.addEventListener('load', fetchTenants);
+    </script>
+</body>
+</html>

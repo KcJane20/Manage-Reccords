@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Tenant Information</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/dollie-script" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Update Tenant Information</h1>
+            <form id="updateTenantForm" onsubmit="return validateForm(event)" class="animated-form">
+                <div class="form-group">
+                    <label for="tenantId">Tenant ID to Update:</label>
+                    <input type="number" id="tenantId" name="tenantId" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fullName">New Full Name:</label>
+                    <input type="text" id="fullName" name="fullName">
+                </div>
+
+                <div class="form-group">
+                    <label for="roomNumber">New Room Number:</label>
+                    <input type="text" id="roomNumber" name="roomNumber">
+                </div>
+
+                <div class="form-group">
+                    <label for="contactNumber">New Contact Number:</label>
+                    <input type="text" id="contactNumber" name="contactNumber">
+                </div>
+
+                <div class="form-group">
+                    <label for="rentAmount">Rent Amount:</label>
+                    <input type="number" id="rentAmount" name="rentAmount" step="0.01">
+                </div>
+
+                <input type="submit" value="Update Information">
+            </form>
+            <p><a href="index.html" class="back-link">Back</a></p>
+            <div id="message"></div>
+        </div>
+    </main>
+
+    <script>
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.form-group').forEach((group, index) => {
+                group.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+            });
+        });
+
+        // Pre-fill and lock the Rent Amount field with a fixed value of ₱4000
+        window.addEventListener('load', () => {
+            const rentAmountField = document.getElementById('rentAmount');
+            rentAmountField.value = 4000;
+            rentAmountField.setAttribute('readonly', true);
+        });
+
+        async function validateForm(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const roomNumber = document.getElementById('roomNumber').value.trim();
+            const contactNumber = document.getElementById('contactNumber').value.trim();
+            const rentAmount = document.getElementById('rentAmount').value.trim();
+
+            if (!fullName && !roomNumber && !contactNumber && !rentAmount) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = '❌ Please fill in at least one field to update';
+                return false;
+            }
+
+            if (contactNumber && !/^\d{11}$/.test(contactNumber)) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = '❌ Contact Number must be exactly 11 digits.';
+                return false;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('tenantId', document.getElementById('tenantId').value);
+                if (fullName) formData.append('fullName', fullName);
+                if (roomNumber) formData.append('roomNumber', roomNumber);
+                if (contactNumber) formData.append('contactNumber', contactNumber);
+                if (rentAmount) formData.append('rentAmount', rentAmount);
+
+                const response = await fetch('/updateTenant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const result = await response.text();
+                
+                if (response.ok) {
+                    messageDiv.className = 'success';
+                    messageDiv.innerHTML = `✅ ${result}`;
+                    // Clear form fields except tenantId
+                    document.getElementById('fullName').value = '';
+                    document.getElementById('roomNumber').value = '';
+                    document.getElementById('contactNumber').value = '';
+                    document.getElementById('rentAmount').value = '';
+                } else {
+                    throw new Error(result);
+                }
+            } catch (error) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = `❌ ${error.message || 'Error updating tenant information. Please try again.'}`;
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>

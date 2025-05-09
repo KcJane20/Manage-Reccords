@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Payment Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/dollie-script" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Check Payment Status</h1>
+            <form id="checkPaymentForm" onsubmit="return validateForm(event)" class="animated-form">
+                <div class="form-group">
+                    <label for="tenantId">Tenant ID:</label>
+                    <input type="number" id="tenantId" name="tenantId" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Month and Year:</label>
+                    <div class="month-year-container">
+                        <select id="month" required>
+                            <option value="">Select Month</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                        <select id="year" required>
+                            <option value="">Select Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <input type="submit" value="Check Status">
+            </form>
+
+            <div class="status-container" id="statusContainer" style="display: none;">
+                <h2>Payment Status</h2>
+                <div id="paymentStatus"></div>
+            </div>
+            <p><a href="index.html" class="back-link">Back</a></p>
+        </div>
+    </main>
+
+    <script>
+        function populateYearDropdown() {
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            
+            for (let year = currentYear - 1; year <= currentYear + 2; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+            
+            yearSelect.value = currentYear;
+        }
+
+        window.addEventListener('load', () => {
+            populateYearDropdown();
+            document.querySelectorAll('.form-group').forEach((group, index) => {
+                group.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+            });
+        });
+
+        async function validateForm(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('paymentStatus');
+            const month = document.getElementById('month').value;
+            const year = document.getElementById('year').value;
+            const paymentMonth = `${month} ${year}`;
+            
+            try {
+                const response = await fetch(`/getPaymentStatus?tenantId=${document.getElementById('tenantId').value}&paymentMonth=${encodeURIComponent(paymentMonth)}`);
+                if (!response.ok) {
+                    throw new Error('Failed to check payment status');
+                }
+                const result = await response.json();
+                
+                messageDiv.style.animation = 'fadeIn 0.5s ease-out';
+                
+                if (result.paid) {
+                    messageDiv.innerHTML = `
+                        <p class="status-paid">
+                            Payment for ${paymentMonth}: Paid<br>
+                            Amount: ₱${result.amount_paid}<br>
+                            Date Paid: ${new Date(result.payment_date).toLocaleDateString()}
+                        </p>`;
+                } else {
+                    messageDiv.innerHTML = `<p class="status-unpaid">Payment for ${paymentMonth}: Not Paid</p>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.innerHTML = '<p style="color: red;">Error checking payment status. Please try again.</p>';
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>

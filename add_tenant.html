@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Tenant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Add New Tenant</h1>
+            <form id="addTenantForm" onsubmit="return validateForm(event)" class="animated-form">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="roomNumber">Room Number</label>
+                    <input type="text" id="roomNumber" name="roomNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateMovedIn">Date Moved In</label>
+                    <input type="date" id="dateMovedIn" name="dateMovedIn" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactNumber">Contact Number</label>
+                    <input type="text" id="contactNumber" name="contactNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rentAmount">Rent Amount</label>
+                    <input type="number" id="rentAmount" name="rentAmount" step="0.01" required>
+                </div>
+
+                <input type="submit" value="Add Tenant">
+            </form>
+            <div id="message"></div>
+            <p><a href="index.html" class="back-link">Back</a></p>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.form-group').forEach((group, index) => {
+            group.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+        });
+
+        async function validateForm(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                const formData = new FormData(event.target);
+                const contactNumber = document.getElementById('contactNumber').value;
+
+                if (!/^\d{11}$/.test(contactNumber)) {
+                    messageDiv.className = 'error';
+                    messageDiv.innerHTML = '❌ Contact Number must be exactly 11 digits.';
+                    return false;
+                }
+
+                const response = await fetch('/addTenant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const result = await response.text();
+                
+                if (response.ok) {
+                    messageDiv.className = 'success';
+                    messageDiv.innerHTML = `${result}`;
+                    // Clear form fields
+                    event.target.reset();
+                } else {
+                    throw new Error(result);
+                }
+            } catch (error) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = `${error.message || 'Error adding tenant. Please try again.'}`;
+            }
+
+            return false;
+        }
+    </script>
+
+    <script>
+        // Pre-fill and lock the Rent Amount field with a fixed value of ₱4000
+        window.addEventListener('load', () => {
+            const rentAmountField = document.getElementById('rentAmount');
+            rentAmountField.value = 4000;
+            rentAmountField.setAttribute('readonly', true);
+        });
+    </script>
+</body>
+</html>

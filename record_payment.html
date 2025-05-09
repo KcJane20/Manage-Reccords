@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/dollie-script" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Record Payment</h1>
+            <form id="recordPaymentForm" onsubmit="return validateForm(event)" class="animated-form">
+                <div class="form-group">
+                    <label for="tenantId">Tenant ID:</label>
+                    <input type="number" id="tenantId" name="tenantId" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Month and Year:</label>
+                    <div class="month-year-container">
+                        <select id="month" required>
+                            <option value="">Select Month</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                        <select id="year" required>
+                            <option value="">Select Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentDate">Payment Date:</label>
+                    <input type="date" id="paymentDate" name="paymentDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amountPaid">Amount Paid:</label>
+                    <input type="number" id="amountPaid" name="amountPaid" step="0.01" required>
+                </div>
+
+                <input type="submit" value="Record Payment">
+            </form>
+            <div id="message"></div>
+            <p><a href="index.html" class="back-link">Back</a></p>
+        </div>
+    </main>
+
+    <script>
+        function populateYearDropdown() {
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            
+            for (let year = currentYear - 1; year <= currentYear + 2; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+            
+            yearSelect.value = currentYear;
+        }
+
+        window.addEventListener('load', () => {
+            populateYearDropdown();
+            document.getElementById('paymentDate').valueAsDate = new Date();
+            document.querySelectorAll('.form-group').forEach((group, index) => {
+                group.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+            });
+        });
+
+        async function validateForm(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+            
+            const month = document.getElementById('month').value;
+            const year = document.getElementById('year').value;
+            const paymentMonth = `${month} ${year}`;
+            
+            try {
+                const formData = new FormData();
+                formData.append('tenantId', document.getElementById('tenantId').value);
+                formData.append('paymentMonth', paymentMonth);
+                formData.append('paymentDate', document.getElementById('paymentDate').value);
+                formData.append('amountPaid', document.getElementById('amountPaid').value);
+
+                const response = await fetch('/recordPayment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const result = await response.text();
+                
+                if (response.ok) {
+                    messageDiv.className = 'success';
+                    messageDiv.innerHTML = `✅ ${result}`;
+                    event.target.reset();
+                    document.getElementById('paymentDate').valueAsDate = new Date();
+                } else {
+                    throw new Error(result);
+                }
+            } catch (error) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = `❌ ${error.message || 'Error recording payment. Please try again.'}`;
+            }
+
+            return false;
+        }
+    </script>
+    <script>
+        // Pre-fill and lock the Amount Paid field with a fixed value of ₱4000
+        window.addEventListener('load', () => {
+            const amountPaidField = document.getElementById('amountPaid');
+            amountPaidField.value = 4000;
+            amountPaidField.setAttribute('readonly', true);
+        });
+    </script>
+</body>
+</html>

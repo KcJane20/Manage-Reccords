@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Payment Record</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/dollie-script" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Update Payment Record</h1>
+            <form id="updatePaymentForm" onsubmit="return validateForm(event)" class="animated-form">
+                <div class="form-group">
+                    <label for="paymentId">Payment ID to Update:</label>
+                    <input type="number" id="paymentId" name="paymentId" required>
+                </div>
+
+                <div class="form-group">
+                    <label>New Payment Month and Year:</label>
+                    <div class="month-year-container">
+                        <select id="month">
+                            <option value="">Select Month</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                        <select id="year">
+                            <option value="">Select Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentDate">New Payment Date:</label>
+                    <input type="date" id="paymentDate" name="paymentDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="amountPaid">Amount Paid:</label>
+                    <input type="number" id="amountPaid" name="amountPaid" step="0.01">
+                </div>
+
+                <input type="submit" value="Update Payment">
+            </form>
+            <div id="message"></div>
+            <p><a href="index.html" class="back-link">Back</a></p>
+        </div>
+    </main>
+
+    <script>
+        function populateYearDropdown() {
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '<option value="">Select Year</option>';
+            
+            for (let year = currentYear - 1; year <= currentYear + 2; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+            
+            yearSelect.value = currentYear;
+        }
+
+        window.addEventListener('load', () => {
+            populateYearDropdown();
+            document.querySelectorAll('.form-group').forEach((group, index) => {
+                group.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+            });
+        });
+
+        async function validateForm(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+            
+            const month = document.getElementById('month').value;
+            const year = document.getElementById('year').value;
+            const paymentMonth = month && year ? `${month} ${year}` : '';
+            const paymentDate = document.getElementById('paymentDate').value.trim();
+            const amountPaid = document.getElementById('amountPaid').value.trim();
+
+            if (!paymentMonth && !paymentDate && !amountPaid) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = 'Please fill in at least one field to update';
+                return false;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('paymentId', document.getElementById('paymentId').value);
+                if (paymentMonth) formData.append('paymentMonth', paymentMonth);
+                if (paymentDate) formData.append('paymentDate', paymentDate);
+                if (amountPaid) formData.append('amountPaid', amountPaid);
+
+                const response = await fetch('/updatePayment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const result = await response.text();
+                
+                if (response.ok) {
+                    messageDiv.className = 'success';
+                    messageDiv.innerHTML = `${result}`;
+                    // Clear form fields except paymentId
+                    document.getElementById('month').value = '';
+                    document.getElementById('year').value = '';
+                    document.getElementById('paymentDate').value = '';
+                    document.getElementById('amountPaid').value = '';
+                } else {
+                    throw new Error(result);
+                }
+            } catch (error) {
+                messageDiv.className = 'error';
+                messageDiv.innerHTML = `${error.message || 'Error updating payment. Please try again.'}`;
+            }
+
+            return false;
+        }
+    </script>
+
+    <script>
+        // Pre-fill and lock the New Amount Paid field with a fixed value of ₱4000
+        window.addEventListener('load', () => {
+            const amountPaidField = document.getElementById('amountPaid');
+            amountPaidField.value = 4000;
+            amountPaidField.setAttribute('readonly', true);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boarding House Record System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <span class="top-nav-item" onclick="openModal('aboutModal')">About</span>
+        <span class="top-nav-item" onclick="openModal('pricingModal')">Pricing</span>
+        <span class="top-nav-item" onclick="openModal('locationModal')">Location</span>
+        <span class="top-nav-item" onclick="openModal('contactModal')">Contact</span>
+    </nav>    <nav class="sidebar">
+        <h2>Manage Records</h2>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Tenants</div>
+            <ul class="sidebar-menu">
+                <li><a href="add_tenant.html"><span>• Add Tenant</span></a></li>
+                <li><a href="remove_tenant.html"><span>• Remove Tenant</span></a></li>
+                <li><a href="view_tenants.html"><span>• View Tenants</span></a></li>
+                <li><a href="update_tenant.html"><span>• Update Tenant</span></a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Payments</div>
+            <ul class="sidebar-menu">
+                <li><a href="record_payment.html"><span>• Record Payment</span></a></li>
+                <li><a href="check_payment_status.html"><span>• Check Payment</span></a></li>
+                <li><a href="view_payments.html"><span>• View Payments</span></a></li>
+                <li><a href="update_payment.html"><span>• Update Payment</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Modals -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('aboutModal')">&times;</span>
+            <h2>About</h2>
+            <p>This website is designed to help manage the Barbhie Boarding House more easily.</p>
+            <p>You can use it to:</p>
+            <ul>
+                <li>Add and remove tenants</li>
+                <li>Record and update rent payments</li>
+                <li>View all tenant and payment records in one place</li>
+            </ul>
+            <p>It helps keep everything organized, saves time, and makes it easier to track important information about the boarding house.</p>
+        </div>
+    </div>
+
+    <div id="pricingModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('pricingModal')">&times;</span>
+            <h2>Pricing</h2>
+            <p>Our rooms are available at a monthly rate of ₱4000.</p>
+            <div class="inclusions">
+                <h3>Inclusions:</h3>
+                <ul>
+                    <li>Internet</li>
+                    <li>Electricity</li>
+                    <li>Water</li>
+                </ul>
+            </div>
+            <p>To secure a room, an advance payment and deposit are required. For more details and availability, feel free to contact us.</p>
+        </div>
+    </div>
+
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('locationModal')">&times;</span>
+            <h2>Location</h2>
+            <p>Conveniently located near schools, shopping centers, and public transportation, Barbhie Boarding House is easily accessible and well-connected to essential services.</p>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('contactModal')">&times;</span>
+            <h2>Contact Information</h2>
+            <div class="contact-details">
+                <p><span>Phone:</span> 09300088442</p>
+                <p><span>Email:</span> babhie_boardinghouse@yahoo.com</p>
+                <p><span>Address:</span> Pluto Street, Barangay Saturn, Universe City</p>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="centered-content">
+            <h1>Barbhie Boarding House</h1>
+            <p class="welcome-message" style="text-align: center;">Welcome to the Barbhie Boarding House Management System.<br>Use the sidebar menu to manage tenants and payments.</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-left">Kc Jane Abirin</div>
+        <div class="footer-right">barbhie_boardingHouse@yahoo.com</div>
+    </footer>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = "block";
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = "none";
+                });
+                document.body.style.overflow = "auto";
+            }
+        });
+    </script>
+</body>
+</html>
